@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Tumble</string>
+    <string name="email">Enter your email</string>
+    <string name="name">Enter your name</string>
+    <string name="password">Enter your password</string>
+    <string name="confirmPassword">Confirm your password</string>
+    <string name="registerButton">Register</string>
+    <string name="loginButton">Login</string>
+    <string name="registerLink">If not registered, click here</string>
+</resources>
