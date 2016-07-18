@@ -1,5 +1,5 @@
 package com.wilsong.tumble;
-
+// imports required
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -18,23 +18,49 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 /**
- * Created by Gerard on 12/07/2016.
+ *  Method sets up a listener to acquire data readings from the accelerometer sensor.
+ *  It also
+ *  Created by Gerard on 12/07/2016.
  */
 public class SensorActivity extends AppCompatActivity implements View.OnClickListener {
-    private SensorManager sensorManager ;
+
+    /**
+     * Variable for obtaining an instance of the SensorManager class
+     */
+    private SensorManager sensorManager;
+    /**
+     * Variable to obtain an instance of a Sensor
+     */
     private Sensor accel;
+    /**
+     * variable for button
+     */
     private Button listenButton;
 
 
-
+    /**
+     *  Method sets up a new instance of the SensorEventListener called accelerometer listener
+     */
     private SensorEventListener accelerometerListener = new SensorEventListener() {
+        /**
+         * Method to receive sensor events via the SensorEvent class.
+         * The SensorEvent returns an array consisting of the float values of the X, Y, Z axis data
+         * An array called accelerometerData is created to store the X, Y, Z axis values
+         * @param sensorEvent
+         */
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             long timeStamp = sensorEvent.timestamp;
             float value = sensorEvent.values[0];
             float[] accelerometerData = new float[3];
+            accelerometerData[0] = sensorEvent.values[0];
+            accelerometerData[1] = sensorEvent.values[1];
+            accelerometerData[2] = sensorEvent.values[2];
+            Threshold(accelerometerData);
+
             String comment = timeStamp + " "+ value;
-            Toast.makeText(SensorActivity.this, comment, Toast.LENGTH_SHORT).show();
+            String commenter = timeStamp+ " "+ Double.toString(accelerometerData[0])+ " "+ Double.toString(accelerometerData[1])+ " "+ Double.toString(accelerometerData[2]);
+            //Toast.makeText(SensorActivity.this, commenter, Toast.LENGTH_SHORT).show();
             TextView tAX = (TextView) findViewById(R.id.ax);
             TextView tAY = (TextView) findViewById(R.id.ay);
             TextView tAZ = (TextView) findViewById(R.id.az);
@@ -43,6 +69,8 @@ public class SensorActivity extends AppCompatActivity implements View.OnClickLis
             tAX.setText(Double.toString(accelerometerData[0]));
             tAY.setText(Double.toString(accelerometerData[1]));
             tAZ.setText(Double.toString(accelerometerData[2]));
+
+
         }
 
         @Override
@@ -52,15 +80,37 @@ public class SensorActivity extends AppCompatActivity implements View.OnClickLis
         }
     };
 
+    private void Threshold(float[] accelerometerData) {
+        double x = accelerometerData[0];
+        double y = accelerometerData[1];
+        double z = accelerometerData[2];
+        double gravity = 9.81;
+        double acc = Math.sqrt(x * x + y * y + z * z);
+        double gForce = acc/gravity;
+
+        if (gForce > 4 ){
+            Toast.makeText(SensorActivity.this, "Threshold hit", Toast.LENGTH_SHORT).show();
+        }
+
+
+
+    }
+
+    /**
+     * Method initialises the activity_sensor.xml
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sensor);
-        // get sensor manager
+        // Get an instance of the SensorManager class
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        // get the accelerometer sensor
+        // Query for the accelerometer sensor
         accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        // set the listenButton to type button and link it with the listenButton id in the activitySensor xml
         listenButton = (Button) findViewById(R.id.listenButton);
+        // set the on click listener for the listenButton
         listenButton.setOnClickListener(this);
     }
 
@@ -68,6 +118,7 @@ public class SensorActivity extends AppCompatActivity implements View.OnClickLis
     protected void onResume(){
         super.onResume();
         if(accel !=null){
+            // register the sensor listener to pick up updates in the accelerometer data using the default update rate (1 reading per second)
             sensorManager.registerListener(accelerometerListener, accel, sensorManager.SENSOR_DELAY_NORMAL);
         }
     }

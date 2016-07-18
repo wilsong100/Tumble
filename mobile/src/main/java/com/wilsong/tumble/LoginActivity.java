@@ -1,5 +1,5 @@
 package com.wilsong.tumble;
-import android.app.Activity;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -145,7 +145,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void handleMainIntent() {
-        Intent mainScreenIntent = new Intent(LoginActivity.this, MainScreenActivity.class);
+        //Intent mainScreenIntent = new Intent(LoginActivity.this, MainScreenActivity.class);
+        Intent mainScreenIntent = new Intent(LoginActivity.this, SensorActivity.class);
         //start the intent
         LoginActivity.this.startActivity(mainScreenIntent);
 
