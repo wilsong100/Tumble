@@ -4,13 +4,18 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,6 +42,10 @@ public class SensorActivity extends AppCompatActivity implements View.OnClickLis
      */
     private Button listenButton;
 
+    private double gravity = 9.81;
+    private double x, y, z;
+    private long lastTime = 0;
+
 
     /**
      *  Method sets up a new instance of the SensorEventListener called accelerometer listener
@@ -51,14 +60,15 @@ public class SensorActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
             long timeStamp = sensorEvent.timestamp;
-            float value = sensorEvent.values[0];
+
+
+            //float value = sensorEvent.values[0];
             float[] accelerometerData = new float[3];
             accelerometerData[0] = sensorEvent.values[0];
             accelerometerData[1] = sensorEvent.values[1];
             accelerometerData[2] = sensorEvent.values[2];
-            Threshold(accelerometerData);
 
-            String comment = timeStamp + " "+ value;
+            // String comment = timeStamp + " "+ value;
             String commenter = timeStamp+ " "+ Double.toString(accelerometerData[0])+ " "+ Double.toString(accelerometerData[1])+ " "+ Double.toString(accelerometerData[2]);
             //Toast.makeText(SensorActivity.this, commenter, Toast.LENGTH_SHORT).show();
             TextView tAX = (TextView) findViewById(R.id.ax);
@@ -70,6 +80,16 @@ public class SensorActivity extends AppCompatActivity implements View.OnClickLis
             tAY.setText(Double.toString(accelerometerData[1]));
             tAZ.setText(Double.toString(accelerometerData[2]));
 
+            Threshold(accelerometerData);
+            //boolean isPhoneFalling = freefall(accelerometerData);
+            //if ((timeStamp - lastTime)>100 && isPhoneFalling) {
+
+
+            //}
+            //lastTime = timeStamp;
+
+
+
 
         }
 
@@ -80,22 +100,95 @@ public class SensorActivity extends AppCompatActivity implements View.OnClickLis
         }
     };
 
-    private void Threshold(float[] accelerometerData) {
-        double x = accelerometerData[0];
-        double y = accelerometerData[1];
-        double z = accelerometerData[2];
-        double gravity = 9.81;
+    private boolean freefall(float[] accelerometerData) {
+        x = accelerometerData[0];
+        y = accelerometerData[1];
+        z = accelerometerData[2];
+
         double acc = Math.sqrt(x * x + y * y + z * z);
         double gForce = acc/gravity;
 
-        if (gForce > 4 ){
-            Toast.makeText(SensorActivity.this, "Threshold hit", Toast.LENGTH_SHORT).show();
+        if (gForce >0.75 ){
+            //Toast.makeText(SensorActivity.this, "Freefall hit", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private void Threshold(float[] accelerometerData) {
+        x = accelerometerData[0];
+        y = accelerometerData[1];
+        z = accelerometerData[2];
+
+        double acc = Math.sqrt(x * x + y * y + z * z);
+        double gForce = acc/gravity;
+
+        if (gForce >6 ){
+            Toast.makeText(SensorActivity.this, "Ground hit", Toast.LENGTH_SHORT).show();
+            call();
         }
 
 
 
     }
 
+    private void call() {
+        Intent callIntent = new Intent(Intent.ACTION_CALL);
+        String contact = "07703520914";
+        callIntent.setData(Uri.parse("tel:" + contact));
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        startActivity(callIntent);
+        AudioManager audioManager = (AudioManager)getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setMode(AudioManager.MODE_IN_CALL);
+        audioManager.setSpeakerphoneOn(true);
+
+
+        sendSMS(contact);
+
+    }
+    private void sendSMS(String contact) {
+        String sms = "Alert, possible fall";
+
+        // String smsMap = getCurrentLocation();
+        //Location currentLocation = new Location("");
+        // double latitude = currentLocation.getLatitude();
+        // Double longitude = currentLocation.getLongitude();
+        //String stringLAT = Double.toString(currentLocation.getLatitude());
+        //String stringLONG = Double.toString(currentLocation.getLatitude());
+
+        //String mapURL = "maps.google.com/maps?q=" + currentLocation.getLatitude() + "," + currentLocation.getLongitude();
+       // textLatitude.setText(mapURL);
+        //textLongitude.setText(stringLONG);
+
+
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            StringBuffer smsBody = new StringBuffer();
+            //smsBody.append("maps.google.com/maps?q=");
+            //smsBody.append(currentLocation.getLatitude());
+            //smsBody.append(",");
+            //smsBody.append(currentLocation.getLatitude());
+
+            //smsBody.append(Uri.parse(mapURL));
+            //body = smsBody.toString();
+            //smsManager.sendTextMessage(contact, null, sms + " " + body, null, null);
+            smsManager.sendTextMessage(contact, null, sms, null, null);
+            Toast.makeText(getApplicationContext(), "SMS sent!", Toast.LENGTH_SHORT).show();
+        } catch (Exception exception) {
+
+            Toast.makeText(getApplicationContext(), "SMS failed ", Toast.LENGTH_SHORT).show();
+            exception.printStackTrace();
+        }
+    }
     /**
      * Method initialises the activity_sensor.xml
      * @param savedInstanceState
