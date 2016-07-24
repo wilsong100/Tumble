@@ -145,8 +145,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void handleMainIntent() {
-        //Intent mainScreenIntent = new Intent(LoginActivity.this, MainScreenActivity.class);
-        Intent mainScreenIntent = new Intent(LoginActivity.this, SensorActivity.class);
+        Intent mainScreenIntent = new Intent(LoginActivity.this, HeartRateActivity.class);
+       // Intent mainScreenIntent = new Intent(LoginActivity.this, SensorActivity.class);
         //start the intent
         LoginActivity.this.startActivity(mainScreenIntent);
 

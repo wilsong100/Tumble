@@ -122,9 +122,10 @@ public class SensorActivity extends AppCompatActivity implements View.OnClickLis
 
         double acc = Math.sqrt(x * x + y * y + z * z);
         double gForce = acc/gravity;
-
-        if (gForce >6 ){
-            Toast.makeText(SensorActivity.this, "Ground hit", Toast.LENGTH_SHORT).show();
+        int g = 2;
+        String jam = "Ground hit Gforce is: ";
+        if (gForce >g ){
+            Toast.makeText(SensorActivity.this, jam + g, Toast.LENGTH_SHORT).show();
             call();
         }
 

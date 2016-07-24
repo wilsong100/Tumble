@@ -8,4 +8,7 @@
     <string name="loginButton">Login</string>
     <string name="registerLink">If not registered, click here</string>
     <string name="log">Start Log</string>
+    <string name="consentHR">Heat Rate Consent</string>
+    <string name="startHR">Start Heart Rate</string>
+
 </resources>
